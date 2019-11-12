@@ -1,7 +1,10 @@
-import sqlite3
 import time
 import subprocess
 from contacts import getName
+from database import Database
+
+from pathlib import Path
+HOME = str(Path.home())
 
 prevRowId = 0
 
@@ -10,21 +13,7 @@ class Message:
     self._rowid = rowid
     self._text = text
 
-class Database:
-  def __init__(self, path):
-    self._db = sqlite3.connect(path)
-
-  def getLastRowId(self):
-    c = self._db.cursor()
-    c.execute("SELECT ROWID FROM message ORDER BY ROWID DESC LIMIT 1")
-    return c.fetchone()[0]
-
-  def getMessageForRowId(self, rowid):
-    c = self._db.cursor()
-    c.execute("SELECT message.text, handle.id from message LEFT OUTER JOIN handle ON message.handle_id = handle.ROWID WHERE message.ROWID=?", (rowid, ))
-    return c.fetchone()
-
-db = Database("/Users/john/Library/Messages/chat.db")
+db = Database(HOME + "Library/Messages/chat.db")
 
 PREFIX = "!"
 def manageShit(message, recipient, name):
