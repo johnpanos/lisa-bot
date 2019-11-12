@@ -6,10 +6,10 @@ class Database:
 
   def getLastRowId(self):
     c = self._db.cursor()
-    c.execute("SELECT ROWID FROM message ORDER BY ROWID DESC LIMIT 1")
+    c.execute("SELECT * FROM message WHERE message.is_from_me = 0 AND message.text IS NOT NULL ORDER BY message.ROWID DESC LIMIT 1;")
     return c.fetchone()[0]
 
   def getMessageForRowId(self, rowid):
     c = self._db.cursor()
-    c.execute("SELECT message.text, handle.id from message LEFT OUTER JOIN handle ON message.handle_id = handle.ROWID WHERE message.ROWID=?", (rowid, ))
+    c.execute("SELECT message.text, message.cache_roomnames, handle.id from message LEFT OUTER JOIN handle ON message.handle_id = handle.ROWID WHERE message.ROWID=?", (rowid, ))
     return c.fetchone()
