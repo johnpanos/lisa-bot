@@ -49,6 +49,9 @@ def stripNumber(number):
 
 # print(next((item for item in mylist for number in item["phone"] if stripNumber(number) == "+14084311571"), None))
 def getName(num):
+  """
+  Returns the name of a user given a number or email
+  """
   if num == None:
     return ""
   for item in mylist:

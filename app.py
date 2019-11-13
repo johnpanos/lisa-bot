@@ -1,10 +1,9 @@
 import os
 import time
 import subprocess
-from contacts import getName
 from database import Database
 import config
-from chat import Chat, Message
+from imessage import Chat, Message, Recipient
 
 from pathlib import Path
 HOME = str(Path.home())
@@ -97,11 +96,8 @@ def handleCommand(message):
 while True:
   newId = db.getLastRowId()
   if newId != prevRowId:
-    print("different")
     message = db.getMessageForRowId(newId)
     messageObject = Message(message[0], Chat(message[2], message[1]))
-    # print("{0}: {1}".format(message[0], getName(message[1])))
     handleCommand(messageObject)
-    # messageObject.getChat().sendMessage("Hello, {0}".format(messageObject.getChat().getRecipient().getName()))
     prevRowId = newId
   time.sleep(1)
