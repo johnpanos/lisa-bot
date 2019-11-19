@@ -28,8 +28,8 @@ class BuddyChat(Chat):
     subprocess.call(["osascript", "sendpic.scpt", imagePath, self._buddy.getId()])
 
   def __repr__(self):
-    mystring = "Members: \n\t{0}\n"
-    return mystring.format(self.getBuddy())
+    mystring = "Buddy: \n\t{0}\n"
+    return mystring.format(self.getBuddy().format("\n", "\n\t"))
 
 class GroupChat(Chat):
   def __init__(self, roomName=None, displayName="N/A"):
