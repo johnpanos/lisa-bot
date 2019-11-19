@@ -3,22 +3,27 @@ import time
 import subprocess
 from database import Database
 import config
-from imessage import Chat, Message, Recipient
+from imessage import GroupChat, BuddyChat, Message, Buddy
+from roles import RoleManager, AdminError
 import matplotlib.pyplot as plt
 from os import listdir
 from os.path import isfile, join
 from random import randrange
+import traceback
 
 from pathlib import Path
 HOME = str(Path.home())
+
+roleManager = RoleManager()
 
 db = Database(HOME + "/Library/Messages/chat.db")
 prevRowId = db.getLastRowId()
 
 class Command:
-  def __init__(self, command, helpText):
+  def __init__(self, command, helpText, requiresAdmin=False):
     self._command = command
     self._help = helpText
+    self._requiresAdmin = requiresAdmin
 
   def __call__(self, message, messageArr):
     print("Not Implemented")
@@ -56,7 +61,7 @@ class Name(Command):
     super().__init__("name", "Print out your name associated with your number!")
 
   def __call__(self, message, messageArr):
-    message.getChat().sendMessage("Your name is: {0}".format(message.getChat().getRecipient().getName()))
+    message.getChat().sendMessage("Your name is: {0}".format(message.getSender().getName()))
 
 class WordStatistic(Command):
   def __init__(self):
@@ -65,7 +70,7 @@ class WordStatistic(Command):
   def __call__(self, message, messageArr):
     chat = message.getChat()
     print(chat)
-    if not chat.isGroup():
+    if not isinstance(chat, GroupChat):
       chat.sendMessage("This command only works with group chats!")
       return
 
@@ -75,10 +80,10 @@ class WordStatistic(Command):
 
     word = " ".join(messageArr[1:])
     data = db.getCountForWord(chat, word)
-    displayName = chat.getDisplayname()
+    displayName = chat.getDisplayName()
 
     try:
-      labels = [Recipient(d[1]).getName() + ": " + str(d[0]) for d in data]
+      labels = [Buddy(d[1]).getName() + ": " + str(d[0]) for d in data]
       total = sum([d[0] for d in data])
       sizes = [d[0]/total for d in data]
 
@@ -113,12 +118,14 @@ class Gayle(Command):
     chat.sendImage(os.getcwd() + "/beebe/" + self.gaylePhotos[randomIndex])
 
 class Debug(Command):
-  def __init__(self, command, helpText):
-    super().__init__("debug", "Prints debug information to the chat")
+  def __init__(self):
+    super().__init__("debug", "Prints debug information to the chat", True)
   
   def __call__(self, message, messageArr):
+    roleManager.ifNotAdminRaise(message.getSender())
     chat = message.getChat()
-    output = "Chat: {0}\n".format(chat)
+    output = "Chat Type: {1}\nChat: \n\t{0}".format(str(chat).replace("\n", "\n\t"), chat.__class__.__name__)
+    chat.sendMessage(output)
 
 commands = {
   "help": Help(),
@@ -139,7 +146,15 @@ def handleCommand(message):
     print("Command:", command)
     # print("Parameter", commandList[1])
     if command in commands:
-      commands[command](message, commandList)
+      try:
+        commands[command](message, commandList)
+      except AdminError as e:
+        message.getChat().sendMessage("You must be an admin to run that command!")
+      except Exception as e:
+        print(e)
+        message.getChat().sendMessage("Unknown exception occurred in command: " + command)
+        time.sleep(0.1)
+        message.getChat().sendMessage(traceback.format_exc())
     else:
       message.getChat().sendMessage("Unknown Command: {0}".format(command))
 
@@ -148,7 +163,11 @@ while True:
   i = 0
   for row in rows:
     prevRowId = row[0]
-    messageObject = Message(row[1], Chat(row[3], row[2]))
+    print(row)
+    if row[2] is not None:
+      messageObject = Message(row[1], GroupChat(row[2]), Buddy(row[3]))
+    else:
+      messageObject = Message(row[1], BuddyChat(Buddy(row[3])), Buddy(row[3]))
     handleCommand(messageObject)
   # if newId != prevRowId:
   #   message = db.getMessageForRowId(newId)
