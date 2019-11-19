@@ -10,7 +10,11 @@ class Recipient:
     return self._id
 
   def getName(self):
-    return getName(self._id)
+    name = getName(self._id)
+    if name is not None:
+      return name
+    else:
+      return self._id
 
   def sendMessage(self, message):
     subprocess.call(["osascript", "send.scpt", message, self._id])

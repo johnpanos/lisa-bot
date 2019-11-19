@@ -1,5 +1,6 @@
 import subprocess
 from imessage.recipient import Recipient
+from database import db
 
 class Chat:
   def __init__(self, recipient, roomname=None):
@@ -27,6 +28,14 @@ class Chat:
       subprocess.call(["osascript", "sendpicgc.scpt", imagePath, "iMessage;+;" + self._roomname])
     else:
       subprocess.call(["osascript", "sendpic.scpt", imagePath, self._recipient.getId()])
+
+  def getRoomname(self):
+    return self._roomname
+
+  def getDisplayname(self):
+    c = db._db.cursor()
+    c.execute("SELECT chat.display_name FROM chat WHERE chat.room_name = ?", (self.getRoomname(), ))
+    return c.fetchone()[0]
 
   def __str__(self):
     return "Roomname: {0}, Recipient: {1}".format(self._roomname, self._recipient)

@@ -57,7 +57,6 @@ class WordStatistic(Command):
     chat = message.getChat()
     print(chat)
     if not chat.isGroup():
-      
       chat.sendMessage("This command only works with group chats!")
       return
     # chat.sendImage(os.getcwd() + "/gb.jpg")
@@ -95,6 +94,7 @@ def handleCommand(message):
 
 while True:
   newId = db.getLastRowId()
+  print("Last ID", newId)
   if newId != prevRowId:
     message = db.getMessageForRowId(newId)
     messageObject = Message(message[0], Chat(message[2], message[1]))
