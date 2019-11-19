@@ -8,8 +8,8 @@ from imessage import Chat, Message, Recipient
 from pathlib import Path
 HOME = str(Path.home())
 
-prevRowId = 0
 db = Database(HOME + "/Library/Messages/chat.db")
+prevRowId = db.getLastRowId()
 
 class Command:
   def __init__(self, command, helpText):
@@ -82,22 +82,25 @@ commands = {
 }
 
 def handleCommand(message):
-  cmd = message.getMessage()
+  cmd = message.getText()
   if cmd[0] == "!":
-    print("Command found")
     commandList = cmd.split(" ")
     command = commandList[0][1:].lower()
-    print("Command", command)
+    print("Command:", command)
     # print("Parameter", commandList[1])
     if command in commands:
       commands[command](message, commandList)
+    else:
+      message.getChat().sendMessage("Unknown Command: {0}".format(command))
 
 while True:
-  newId = db.getLastRowId()
-  print("Last ID", newId)
-  if newId != prevRowId:
-    message = db.getMessageForRowId(newId)
-    messageObject = Message(message[0], Chat(message[2], message[1]))
+  rows = db.getLastRowId(prevRowId)
+  i = 0
+  for row in rows:
+    prevRowId = row[0]
+    messageObject = Message(row[1], Chat(row[3], row[2]))
     handleCommand(messageObject)
-    prevRowId = newId
-  time.sleep(1)
+  # if newId != prevRowId:
+  #   message = db.getMessageForRowId(newId)
+
+  time.sleep(2)

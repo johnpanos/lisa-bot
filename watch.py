@@ -11,7 +11,7 @@ if __name__ == "__main__":
     path = sys.argv[1] if len(sys.argv) > 1 else '.'
     event_handler = LoggingEventHandler()
     observer = Observer()
-    observer.schedule(event_handler, path, recursive=True)
+    observer.schedule(event_handler, path, recursive=False)
     observer.start()
     try:
         while True:
