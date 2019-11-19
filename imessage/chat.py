@@ -27,6 +27,10 @@ class BuddyChat(Chat):
   def sendImage(self, imagePath):
     subprocess.call(["osascript", "sendpic.scpt", imagePath, self._buddy.getId()])
 
+  def __repr__(self):
+    mystring = "Members: \n\t{0}\n"
+    return mystring.format(self.getBuddy())
+
 class GroupChat(Chat):
   def __init__(self, roomName=None, displayName="N/A"):
     self._roomName = roomName
