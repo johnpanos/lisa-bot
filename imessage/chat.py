@@ -25,7 +25,7 @@ class BuddyChat(Chat):
     self._buddy.sendMessage(message)
   
   def sendImage(self, imagePath):
-    subprocess.call(["osascript", "sendpic.scpt", imagePath, self._recipient.getId()])
+    subprocess.call(["osascript", "sendpic.scpt", imagePath, self._buddy.getId()])
 
 class GroupChat(Chat):
   def __init__(self, roomName=None, displayName="N/A"):
