@@ -18,8 +18,8 @@ class Database:
 
   def getCountForWord(self, chat, word):
     c = self._db.cursor()
-    c.execute("SELECT COUNT(message.text), handle.id FROM message LEFT OUTER JOIN handle ON message.handle_id = handle.ROWID WHERE message.is_from_me = 0 AND message.cache_roomnames = ? AND message.text LIKE ? GROUP BY message.handle_id", (chat.getRoomname(), "%" + word + "%", ))
+    c.execute("SELECT COUNT(message.text), handle.id FROM message LEFT OUTER JOIN handle ON message.handle_id = handle.ROWID WHERE message.is_from_me = 0 AND message.cache_roomnames = ? AND message.text LIKE ? AND message.text NOT LIKE '%wordstat%' GROUP BY message.handle_id", (chat.getRoomname(), "%" + word + "%", ))
     print(c)
     return c.fetchall()
 
-db = Database("/Users/john/Library/Messages/chat.db")
+db = Database("/Users/panos/Library/Messages/chat.db")

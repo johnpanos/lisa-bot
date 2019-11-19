@@ -4,6 +4,10 @@ import subprocess
 from database import Database
 import config
 from imessage import Chat, Message, Recipient
+import matplotlib.pyplot as plt
+from os import listdir
+from os.path import isfile, join
+from random import randrange
 
 from pathlib import Path
 HOME = str(Path.home())
@@ -24,6 +28,9 @@ class Command:
 
   def getHelp(self):
     return self._help
+  
+  def onlyGroupChat(self):
+    return False
 
 class Help(Command):
   def __init__(self):
@@ -34,6 +41,8 @@ class Help(Command):
     for cmd in commands.items():
       output += "\n\n{0}{1}: {2}".format(config.PREFIX, cmd[1].getCommand(), cmd[1].getHelp())
     message.getChat().sendMessage(output)
+
+
 
 class Shuttle(Command):
   def __init__(self):
@@ -59,30 +68,71 @@ class WordStatistic(Command):
     if not chat.isGroup():
       chat.sendMessage("This command only works with group chats!")
       return
-    # chat.sendImage(os.getcwd() + "/gb.jpg")
 
-    chat.sendMessage("Not finished.")
+    if len(messageArr) < 2:
+      chat.sendMessage("You must supply a word after the command!")
+      return
+
+    word = " ".join(messageArr[1:])
+    data = db.getCountForWord(chat, word)
+    displayName = chat.getDisplayname()
+
+    try:
+      labels = [Recipient(d[1]).getName() + ": " + str(d[0]) for d in data]
+      total = sum([d[0] for d in data])
+      sizes = [d[0]/total for d in data]
+
+      explode = [0] * len(labels)
+      explode[sizes.index(max(sizes))] = 0.05
+      explode = tuple(explode)
+
+      fig1, ax1 = plt.subplots()
+      ax1.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, pctdistance=0.85, explode = explode)
+      ax1.set_title("\"{0}\" in {1}".format(word, displayName))
+
+      centre_circle = plt.Circle((0,0),0.70,fc='white')
+      fig = plt.gcf()
+      fig.gca().add_artist(centre_circle)
+
+      ax1.axis('equal')  
+      plt.tight_layout()
+      plt.savefig("tmp/tmpstat.png",bbox_inches='tight',dpi=100)
+      chat.sendImage(os.getcwd() + "/tmp/tmpstat.png")
+    except:
+      chat.sendMessage("Could not find word \"{0}\" in chat!".format(word))
 
 class Gayle(Command):
   def __init__(self):
-    super().__init__("gayle", "mmmmmmmmm gayle beebe oh yeah mhm")
+    super().__init__("gayle", "Shows a random photo of our beloved Beebe")
+    path = os.getcwd() + "/beebe"
+    self.gaylePhotos = [f for f in listdir(path) if isfile(join(path, f))]
 
   def __call__(self, message, messageArr):
     chat = message.getChat()
-    chat.sendImage(os.getcwd() + "/gb.jpg")
+    randomIndex = randrange(len(self.gaylePhotos))
+    chat.sendImage(os.getcwd() + "/beebe/" + self.gaylePhotos[randomIndex])
 
+class Debug(Command):
+  def __init__(self, command, helpText):
+    super().__init__("debug", "Prints debug information to the chat")
   
+  def __call__(self, message, messageArr):
+    chat = message.getChat()
+    output = "Chat: {0}\n".format(chat)
 
 commands = {
   "help": Help(),
-  "shuttle": Shuttle(),
+  # "shuttle": Shuttle(),
   "name": Name(),
   "wordstat": WordStatistic(),
-  "gayle": Gayle()
+  "gayle": Gayle(),
+  "debug": Debug()
 }
 
 def handleCommand(message):
   cmd = message.getText()
+  if cmd is None:
+    return
   if cmd[0] == "!":
     commandList = cmd.split(" ")
     command = commandList[0][1:].lower()

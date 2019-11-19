@@ -3,10 +3,10 @@ from database import Database
 from imessage import Chat
 from imessage import Recipient
 
-db = Database("/Users/john/Library/Messages/chat.db")
+db = Database("/Users/panos/Library/Messages/chat.db")
 
 word = input("> ")
-chat = Chat("+14084311571", "chat976120161778148208")
+chat = Chat("+14084311571", "chat172003174992565788")
 data = db.getCountForWord(chat, word)
 displayName = chat.getDisplayname()
 
@@ -45,14 +45,5 @@ fig.gca().add_artist(centre_circle)
 # Equal aspect ratio ensures that pie is drawn as a circle
 ax1.axis('equal')  
 plt.tight_layout()
-plt.savefig("image.png",bbox_inches='tight',dpi=300)
+plt.savefig("tmp/tmpstat.png",bbox_inches='tight',dpi=300)
 # plt.show()
-
-class Example:
-  def __repr__(self): # __repr__ implementation
-    return "Hello!"
-
-exampleInstance = Example() # Create an instance of Example
-testVariable = str(exampleInstance) # Variable would now contain string "Hello!"
-print(exampleInstance) # Would print Hello! to the console
-print(exampleInstance.__repr__()) # Would also print Hello! to the console
