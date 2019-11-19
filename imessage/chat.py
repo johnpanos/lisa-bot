@@ -29,7 +29,7 @@ class BuddyChat(Chat):
 
   def __repr__(self):
     mystring = "Buddy: \n\t{0}\n"
-    return mystring.format(str(self.getBuddy()).format("\n", "\n\t"))
+    return mystring.format(str(self.getBuddy()).replace("\n", "\n\t"))
 
 class GroupChat(Chat):
   def __init__(self, roomName=None, displayName="N/A"):
