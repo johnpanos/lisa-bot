@@ -1,8 +1,11 @@
 class Message:
   """Model class for Message"""
-  def __init__(self, message, chat, buddy):
+  def __init__(self, message, chat, buddy, subject=None):
     self._text = message
+    self._subject = subject
+
     self._chat = chat
+
     self._buddy = buddy
 
   def getText(self):
